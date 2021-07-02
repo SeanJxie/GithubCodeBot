@@ -115,10 +115,10 @@ class BotClient(discord.Client):
             
         else:
             print(f"\nMessage: {msg.content}")
-            matches = re.findall("http(s?)://github.com/([^\s]+)", msg.content)
+            matches = re.findall("http(s?)://(www\.)?github.com/([^\s]+)", msg.content)
 
             # We want no reps and valid extensions.
-            matches = list(dict.fromkeys(filter(lambda x: get_ext(x[1]) in COMMON_EXTS, matches)))
+            matches = list(dict.fromkeys(filter(lambda x: get_ext(x[-1]) in COMMON_EXTS, matches)))
 
             if len(matches) > 1:
                 await msg.channel.send(f"> :eyes: I've detected {len(matches)} valid links here. They will be served in order!")
@@ -127,15 +127,19 @@ class BotClient(discord.Client):
                 for match in matches:
 
                     # (1)
-                    url = "https://github.com/" + match[1]
-                    print(f"Detected url: {url}")
+                    url = "https://github.com/" + match[-1]
+                    print(f"\nDetected url: {url}")
 
                     # (2)
                     urlSplit = url.split('/')
                     
                     # (3)
                     urlSplit.remove('')
-                    urlSplit.remove("blob")
+                    if "blob" in urlSplit:
+                        urlSplit.remove("blob")
+                    elif "tree" in urlSplit:
+                        urlSplit.remove("tree")
+                        
                     urlSplit[0] = "https:/"
                     urlSplit[1] = "raw.githubusercontent.com"
 
