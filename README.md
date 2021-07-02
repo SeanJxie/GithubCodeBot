@@ -1,5 +1,5 @@
 # DiscordCodeBot
-A discord bot that searches for valid Github code links and displays them with `bs4` and the `discord` api.
+A discord bot that searches for valid Github code links and displays them.
 
 ![example](https://github.com/SeanJxie/DiscordCodeBot/blob/main/example.jpg)
 
