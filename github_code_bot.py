@@ -109,7 +109,7 @@ class BotClient(discord.Client):
 
                             for line in codeString.split('\n'):
                                 
-                                if len(payloadSegment) + len(line) + 6 > PAYLOAD_MAXLEN: # The +6 accounts for the 6 backticks used for code markup
+                                if len(payloadSegment) + len(line) + 6 >= PAYLOAD_MAXLEN: # The +6 accounts for the 6 backticks used for code markup
                                     await msg.channel.send(f"```{payloadSegment}```")
                                     print(f"Payload segment size: {len(payloadSegment) + 6}")
                                     payloadSegment = ''
