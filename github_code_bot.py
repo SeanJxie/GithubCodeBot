@@ -3,10 +3,12 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import re
 
+
 with open("bot_token", 'r') as bt:
     TOKEN = bt.readline()
 
 COMMON_EXTS = (
+    "asm",
     "c",
     "cc",
     "class",
@@ -20,8 +22,8 @@ COMMON_EXTS = (
     "java",
     "lua",
     "m",
-    "m4",
     "md",
+    "m4",
     "php",
     "pl",
     "po",
@@ -29,6 +31,7 @@ COMMON_EXTS = (
     "rb",
     "rs",
     "sh",
+    "s",
     "swift",
     "vb",
     "vcxproj",
@@ -39,7 +42,7 @@ COMMON_EXTS = (
     "html",
     "js",
     "json",
-    "csv"
+    "csv",
 )
 
 PAYLOAD_MAXLEN = 2000 # Discord character limit
@@ -120,7 +123,7 @@ class BotClient(discord.Client):
                             print(f"Payload segment size: {len(payloadSegment) + 6}")
 
                             await msg.channel.send(f"Done!")
-                            
+
                         print("Send success.")
 
                     else:
@@ -134,5 +137,3 @@ class BotClient(discord.Client):
 if __name__ == "__main__":
     bot_client = BotClient()
     bot_client.run(TOKEN)
-
-    
