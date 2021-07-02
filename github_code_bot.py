@@ -3,12 +3,6 @@ from bs4 import BeautifulSoup
 import urllib.request
 import re
 
-"""
-Bug: Backticks in code mess up the code markup.
-     The output is formatted in HTML
-"""
-
-
 with open("bot_token", 'r') as bt:
     TOKEN = bt.readline()
 
