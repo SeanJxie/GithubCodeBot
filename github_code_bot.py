@@ -116,7 +116,8 @@ class BotClient(discord.Client):
                             await msg.channel.send(f"```{payloadSegment}```")
                             print(f"Payload segment size: {len(payloadSegment) + 6}")
 
-                        await msg.channel.send(f"Done!")
+                            await msg.channel.send(f"Done!")
+                            
                         print("Send success.")
 
                     else:
