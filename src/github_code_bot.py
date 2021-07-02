@@ -71,13 +71,20 @@ long_code = True
 
 class BotClient(discord.Client):
     async def on_ready(self):
+        print(f"{self.user} is now online.")
         self.user.name = "GithubCodeBot"
+        print("Username set.")
 
         with open(resource_path("octo.png"), "rb") as pfp:
-            await self.user.edit(avatar=pfp.read())
+            try:
+                await self.user.edit(avatar=pfp.read())
+                print("Avatar set.")
+            except discord.errors.HTTPException:
+                # In the case that the bot is started many times, Discord may complain that we're setting pfp too much. 
+                pass 
 
-        print(f"{self.user} is now online.")
-
+        print("Ready.")    
+        
     async def on_message(self, msg):
         if msg.author == self.user:
             return 
