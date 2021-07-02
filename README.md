@@ -11,5 +11,5 @@ Just one: `!longcode` toggles the bot's ability to display code over the 2000 ch
 # Setup
 - Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html) to obtain a bot token. 
 - Paste the token in the `bot_token` file. 
-- Invite the bot to your server. The instructions to invite the bot can also be found in the previous link.
+- Invite the bot to your server. The instructions to invite the bot can also be found in the previous link. The bot should have `Send Messages` and `Read Message History` permissions only.
 - Run the Python script with the appropraite packages (`bs4`, `discord`) installed.
