@@ -21,6 +21,7 @@ COMMON_EXTS = (
     "lua",
     "m",
     "m4",
+    "md",
     "php",
     "pl",
     "po",
