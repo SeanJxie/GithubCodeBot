@@ -9,5 +9,5 @@
 4) You will be prompted for your bot token once. Enter your token and your bot should be good to go!
 
 # Commands
-Just one: `!longcode` toggles the bot's ability to display code over the 2000 character limit on Discord (by splitting the messages).
+The `help` command outlines it all.
 
