@@ -1,5 +1,4 @@
 # DiscordCodeBot
-A discord bot that searches for valid Github code urls and displays the respective code.
 
 ![example](https://github.com/SeanJxie/DiscordCodeBot/blob/main/exampleImage.png)
 
