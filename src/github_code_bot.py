@@ -4,6 +4,7 @@ import os
 import discord
 import requests
 
+# Handle bot token input
 BT_FILEPATH = os.path.join(os.getcwd(), "bot_token.txt")
 if os.path.exists(BT_FILEPATH):
     with open(BT_FILEPATH, 'r') as btf:
@@ -12,6 +13,19 @@ else:
     TOKEN = input("Enter bot token here (this happens only once): ")
     with open(BT_FILEPATH, 'w') as btf:
         btf.write(TOKEN)
+
+# Handle command character input
+CC_FILEPATH = os.path.join(os.getcwd(), "cmd_char.txt")
+if os.path.exists(CC_FILEPATH):
+    with open(CC_FILEPATH, 'r') as ccf:
+        CMD_CHAR = ccf.readline()
+else:
+    CMD_CHAR = input("Enter your command character here (this happens only once): ")
+    while len(CMD_CHAR) != 1:
+        print("The command character is ONE character only. Please retry.")
+        CMD_CHAR = input("Enter your command character here (this happens only once): ")
+    with open(CC_FILEPATH, 'w') as ccf:
+        ccf.write(CMD_CHAR)
 
 
 def resource_path(relative_path):
@@ -62,14 +76,18 @@ COMMON_EXTS = (
     "csv",
 )
 
+PAYLOAD_MAXLEN = 2000 # Discord character limit
+HEX_YELLOW = 0xFFDF00
+HEX_LBLUE  = 0xADD8E6
+
 def get_ext(urlStr):
     return urlStr[urlStr.rfind('.') + 1:].lower()
 
 
-PAYLOAD_MAXLEN = 2000 # Discord character limit
-long_code = True
-
 class BotClient(discord.Client):
+    long_code = True
+    paused = False
+
     async def on_ready(self):
         print(f"{self.user} is now online.")
         self.user.name = "GithubCodeBot"
@@ -88,18 +106,44 @@ class BotClient(discord.Client):
     async def on_message(self, msg):
         if msg.author == self.user:
             return 
-        
-        elif msg.content.startswith("!longcode"):
-            global long_code
 
-            if not long_code:
+        elif msg.content.startswith(f"{CMD_CHAR}longcode"):
+            if not BotClient.long_code:
                 await msg.channel.send(f"> :green_circle: Alright! I'll display code over the {PAYLOAD_MAXLEN} character limit!")
-                long_code = True
+                BotClient.long_code = True
 
             else:
                 await msg.channel.send(f"> :red_circle: Alright! I'll only display code under the {PAYLOAD_MAXLEN} character limit!")
-                long_code = False
+                BotClient.long_code = False
 
+        elif msg.content.startswith(f"{CMD_CHAR}pause"):
+            if not BotClient.paused:
+                await msg.channel.send(f"> :pause_button: No problem! I'll stay quiet until you type `{CMD_CHAR}pause` again.")
+                BotClient.paused = True
+
+        elif msg.content.startswith(f"{CMD_CHAR}unpause"):
+            if BotClient.paused:
+                await msg.channel.send(f"> :arrow_forward: I'm back! Type `{CMD_CHAR}pause` if you want me to stay quiet again.")
+                BotClient.paused = False
+
+        elif msg.content.startswith(f"{CMD_CHAR}status"):
+            embed = discord.Embed(title="GithubCodeBot :robot: Status:", color=HEX_YELLOW)
+            embed.add_field(name="Paused", value=f">>> `{BotClient.paused}`", inline=False)
+            embed.add_field(name="Preview long code", value=f">>> `{BotClient.long_code}`", inline=False)
+            await msg.channel.send(embed=embed)
+
+        elif msg.content.startswith(f"{CMD_CHAR}help"):
+            embed = discord.Embed(title="GithubCodeBot :robot: Commands", description="_Here's what you can ask me to do!_", color=HEX_LBLUE)
+            embed.add_field(name=f"`{CMD_CHAR}pause`", value=">>> I wont respond to any Github links. I'll still be actively listening for commands, though!", inline=False)
+            embed.add_field(name=f"`{CMD_CHAR}unpause`", value=">>> Whatever `pause` does, this un-does.", inline=False)
+            embed.add_field(name=f"`{CMD_CHAR}longcode`", value=">>> Toggle my ability to preview long pieces of code (by splitting the code into multiple messages). Be carefull with this! Once I get going, I won't stop!", inline=False)
+            embed.add_field(name=f"`{CMD_CHAR}status`", value=">>> View my `pause` and `longcode` states.", inline=False)
+            embed.add_field(name=f"`{CMD_CHAR}help`", value=">>> You're looking at it!", inline=False)
+           
+            await msg.channel.send(embed=embed)
+
+
+        elif not BotClient.paused:
             # The strange process looks like this:
             #
             # (1) https://github.com/SeanJxie/3d-engine-from-scratch/blob/main/CppEngine3D/engine.cpp
@@ -112,8 +156,7 @@ class BotClient(discord.Client):
             #                                            |
             #                                            V
             # (4) https://raw.githubusercontent.com/SeanJxie/3d-engine-from-scratch/main/CppEngine3D/engine.cpp
-            
-        else:
+
             print(f"\nMessage: {msg.content}")
             matches = re.findall("http(s?)://(www\.)?github.com/([^\s]+)", msg.content)
 
@@ -139,7 +182,7 @@ class BotClient(discord.Client):
                         urlSplit.remove("blob")
                     elif "tree" in urlSplit:
                         urlSplit.remove("tree")
-                        
+
                     urlSplit[0] = "https:/"
                     urlSplit[1] = "raw.githubusercontent.com"
 
@@ -184,6 +227,8 @@ class BotClient(discord.Client):
 
 
 if __name__ == "__main__":
+    print("\nThanks for using GithubCodeBot!\nIf you'd like to reset your bot token or command character, simply delete bot_token.txt or cmd_char.txt and reset the program.\n\nConnecting...\n")
+
     bot_client = BotClient()
     try:
         bot_client.run(TOKEN)
