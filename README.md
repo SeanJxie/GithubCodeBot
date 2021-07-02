@@ -1,7 +1,7 @@
 # DiscordCodeBot
 A discord bot that searches for valid Github code urls and displays the respective code.
 
-![example](https://github.com/SeanJxie/DiscordCodeBot/blob/main/example.jpg)
+![example](https://github.com/SeanJxie/DiscordCodeBot/blob/main/exampleImage.png)
 
 # Setup
 - Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html#creating-a-bot-account) to create a bot and obtain a bot token (you don't need to worry about the bot name or avatar). Save the token for later.
