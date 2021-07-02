@@ -8,5 +8,5 @@
 - Download and run [`github_code_bot.exe`](https://github.com/SeanJxie/DiscordCodeBot/blob/main/github_code_bot.exe?raw=true). You will be prompted for your token.
 
 # Commands
-Just one: `!longcode` toggles the bot's ability to display code over the 2000 character limit on Discord.
+Just one: `!longcode` toggles the bot's ability to display code over the 2000 character limit on Discord (by splitting the messages).
 
