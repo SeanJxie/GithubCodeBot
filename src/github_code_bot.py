@@ -1,8 +1,8 @@
-import discord
-from bs4 import BeautifulSoup
-import urllib.request
 import re
 import os
+
+import discord
+import requests
 
 BT_FILEPATH = os.path.join(os.getcwd(), "bot_token.txt")
 if os.path.exists(BT_FILEPATH):
@@ -13,6 +13,15 @@ else:
     with open(BT_FILEPATH, 'w') as btf:
         btf.write(TOKEN)
 
+
+def resource_path(relative_path):
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
  
 COMMON_EXTS = (
     "asm",
@@ -62,6 +71,11 @@ long_code = True
 
 class BotClient(discord.Client):
     async def on_ready(self):
+        self.user.name = "GithubCodeBot"
+
+        with open(resource_path("octo.png"), "rb") as pfp:
+            await self.user.edit(avatar=pfp.read())
+
         print(f"{self.user} is now online.")
 
     async def on_message(self, msg):
@@ -123,17 +137,15 @@ class BotClient(discord.Client):
                     print(f"Rebuilt url: {rawUrl}")
 
                     # Parse HTML and get all text
-                    response = urllib.request.urlopen(rawUrl)
-                    bs4obj = BeautifulSoup(response, features="html.parser")
-
-                    # Send text and split into multiple messages if it's too long
-                    codeString = ''.join(bs4obj.find_all(text=True))
+                    response = requests.get(rawUrl)
+                    codeString = response.text
                     payload = f"```{codeString}```"
                     
                     if len(payload) <= PAYLOAD_MAXLEN:
                         await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
                         await msg.channel.send(payload)
 
+                    # Send text and split into multiple messages if it's too long
                     elif long_code:
                         await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
                         print("Code too long. Splitting.")
