@@ -36,7 +36,9 @@ COMMON_EXTS = (
     "diff",
     "patch",
     "html",
-    "js"
+    "js",
+    "json",
+    "csv"
 )
 
 PAYLOAD_MAXLEN = 2000 # Discord character limit
