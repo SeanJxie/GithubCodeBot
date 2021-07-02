@@ -9,7 +9,7 @@ Bug: Backticks in code mess up the code markup.
 """
 
 
-with open("PersonalTools/discbot/bot_token", 'r') as bt:
+with open("bot_token", 'r') as bt:
     TOKEN = bt.readline()
 
 COMMON_EXTS = (
