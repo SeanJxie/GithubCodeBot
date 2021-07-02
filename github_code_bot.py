@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import urllib.request
 import re
 
+
 with open("bot_token", 'r') as bt:
     TOKEN = bt.readline()
 
@@ -44,6 +45,10 @@ COMMON_EXTS = (
     "csv",
 )
 
+def get_ext(urlStr):
+    return urlStr[urlStr.rfind('.') + 1:].lower()
+
+
 PAYLOAD_MAXLEN = 2000 # Discord character limit
 long_code = True
 
@@ -65,10 +70,6 @@ class BotClient(discord.Client):
                 await msg.channel.send(f"> :red_circle: Alright! I'll only display code under the {PAYLOAD_MAXLEN} character limit!")
                 long_code = False
 
-
-        elif re.match(".*?http(s?)://github.com", msg.content):
-            print("\nGithub link detected.")
-            
             # The process looks like this:
             #
             # (1) https://github.com/SeanJxie/3d-engine-from-scratch/blob/main/CppEngine3D/engine.cpp
@@ -82,16 +83,24 @@ class BotClient(discord.Client):
             #                                            V
             # (4) https://raw.githubusercontent.com/SeanJxie/3d-engine-from-scratch/main/CppEngine3D/engine.cpp
             
-            # (1)
-            try:
-                matchSpan = re.search("http(s?)://github.com/([^\s]+)", msg.content)
-                url = msg.content[matchSpan.start(): matchSpan.end()]
-                print(f"Detected url: {url}")
+        else:
+            print(f"\nMessage: {msg.content}")
+            matches = re.findall("http(s?)://github.com/([^\s]+)", msg.content)
+            matches = list(set(filter(lambda x: get_ext(x[1]) in COMMON_EXTS, matches)))
 
-                # (2)
-                urlSplit = url.split('/')
-                if urlSplit[-1][urlSplit[-1].rfind('.') + 1:].lower() in COMMON_EXTS: # Check if extension is valid
+            if len(matches) > 1:
+                await msg.channel.send(f"> :eyes: I've detected {len(matches)} valid links here. They will be served in order!")
 
+            if len(matches) != 0:
+                for match in matches:
+
+                    # (1)
+                    url = "https://github.com/" + match[1]
+                    print(f"Detected url: {url}")
+
+                    # (2)
+                    urlSplit = url.split('/')
+                    
                     # (3)
                     urlSplit.remove('')
                     urlSplit.remove("blob")
@@ -112,10 +121,11 @@ class BotClient(discord.Client):
                     payload = f"```{codeString}```"
                     
                     if len(payload) <= PAYLOAD_MAXLEN:
+                        await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
                         await msg.channel.send(payload)
 
                     elif long_code:
-                        await msg.channel.send(f"> That's a lot of code! Give me a sec.")
+                        await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
                         print("Code too long. Splitting.")
 
                         payloadSegment = ''
@@ -132,19 +142,12 @@ class BotClient(discord.Client):
                         await msg.channel.send(f"```{payloadSegment}```")
                         print(f"Payload segment size: {len(payloadSegment) + 6}")
 
-                        await msg.channel.send(f"> :ok_hand: Done!")
-
                     else:
                         await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
 
+                    await msg.channel.send(f"> :ok_hand: That's the end of `{urlSplit[-1]}`")
                     print("Send success.")
 
-                else:
-                    print("Invalid extension.")
-
-            except (ValueError, AttributeError) as e:
-                print(f"Error: {e}")
-                
 
 
 if __name__ == "__main__":
