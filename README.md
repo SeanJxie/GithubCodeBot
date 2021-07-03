@@ -4,7 +4,7 @@ Recent Changes
 - Now using `aiohttp` for webscraping instead of `requests`.
 - Now using `discord.ext.commands.Bot` instead of `discord.Client`.
 
-![example](https://github.com/SeanJxie/DiscordCodeBot/blob/main/exampleImage.png)
+![demo](https://github.com/SeanJxie/DiscordCodeBot/blob/main/demo.gif)
 
 # EXE Setup
 1) Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html#creating-a-bot-account) to create a bot and obtain a bot token (you don't need to worry about the bot name or avatar). **Save the bot token for later.**
