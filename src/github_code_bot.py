@@ -2,6 +2,7 @@ import re
 import os
 
 import discord
+from discord.ext import commands
 import aiohttp
 import asyncio
 
@@ -83,168 +84,175 @@ PAYLOAD_MAXLEN = 2000 # Discord character limit
 HEX_YELLOW = 0xFFDF00
 HEX_LBLUE  = 0xADD8E6
 
-# Some helpful functions
 def get_ext(urlStr):
     return urlStr[urlStr.rfind('.') + 1:].lower()
 
+# Bot code
+ghc_bot = commands.Bot(command_prefix=CMD_CHAR, description="A Discord bot to preview code in Github links.")
+ghc_bot.remove_command("help") # We write our own.
+aiohttp_session = None
+long_code = True
+paused = False
 
-class BotClient(discord.Client):
-    long_code = True
-    paused = False
-    aiohttp_session = None
+async def init_aiohttp_session():
+    global aiohttp_session
+    print("aiohttp session init.")
+    aiohttp_session = aiohttp.ClientSession()
 
-    async def init_session():
-        BotClient.aiohttp_session = aiohttp.ClientSession()
+@ghc_bot.event
+async def on_ready():
+    print(f"{ghc_bot.user} is now online.")
+    ghc_bot.user.name = "GithubCodeBot"
+    print("Username set.")
 
-    async def on_ready(self):
-        print(f"{self.user} is now online.")
-        self.user.name = "GithubCodeBot"
-        print("Username set.")
+    with open(resource_path(os.path.join("src", "octo.png")), "rb") as pfp:
+        try:
+            await ghc_bot.user.edit(avatar=pfp.read())
+            print("Avatar set.")
+        except discord.errors.HTTPException:
+            # In the case that the bot is started many times, Discord may complain that we're setting pfp too much. 
+            pass 
+    
+    await init_aiohttp_session()
+    print("Ready.")     
 
-        with open(resource_path("src/octo.png"), "rb") as pfp:
-            try:
-                await self.user.edit(avatar=pfp.read())
-                print("Avatar set.")
-            except discord.errors.HTTPException:
-                # In the case that the bot is started many times, Discord may complain that we're setting pfp too much. 
-                pass 
-        
-        await BotClient.init_session()
-        print("Ready.")    
-        
-    async def on_message(self, msg):
-        if msg.author == self.user:
-            return 
+@ghc_bot.event
+async def on_message(msg):
+    if msg.author == ghc_bot.user:
+        return 
+    elif not paused:
+        # The strange process looks like this:
+        #
+        # (1) https://github.com/SeanJxie/3d-engine-from-scratch/blob/main/CppEngine3D/engine.cpp
+        #                                            |
+        #                                            V
+        # (2) ['https:', '', 'github.com', 'SeanJxie', '3d-engine-from-scratch', 'blob', 'main', 'CppEngine3D', 'engine.cpp']
+        #                                            |
+        #                                            V
+        # (3) ['https:/', 'raw.githubusercontent.com', 'SeanJxie', '3d-engine-from-scratch', 'main', 'CppEngine3D', 'engine.cpp']
+        #                                            |
+        #                                            V
+        # (4) https://raw.githubusercontent.com/SeanJxie/3d-engine-from-scratch/main/CppEngine3D/engine.cpp
 
-        elif msg.content.startswith(f"{CMD_CHAR}longcode"):
-            if not BotClient.long_code:
-                await msg.channel.send(f"> :green_circle: Alright! I'll display code over the {PAYLOAD_MAXLEN} character limit!")
-                BotClient.long_code = True
+        print(f"\nMessage: {msg.content}")
+        matches = re.findall("http(s?)://(www\.)?github.com/([^\s]+)", msg.content)
 
-            else:
-                await msg.channel.send(f"> :red_circle: Alright! I'll only display code under the {PAYLOAD_MAXLEN} character limit!")
-                BotClient.long_code = False
+        # We want no reps and valid extensions.
+        matches = list(dict.fromkeys(filter(lambda x: get_ext(x[-1]) in COMMON_EXTS, matches)))
 
-        elif msg.content.startswith(f"{CMD_CHAR}pause"):
-            if not BotClient.paused:
-                await msg.channel.send(f"> :pause_button: No problem! I'll stay quiet until you type `{CMD_CHAR}pause` again.")
-                BotClient.paused = True
+        if len(matches) > 1:
+            await msg.channel.send(f"> :eyes: I've detected {len(matches)} valid links here. They will be served in order!")
 
-        elif msg.content.startswith(f"{CMD_CHAR}unpause"):
-            if BotClient.paused:
-                await msg.channel.send(f"> :arrow_forward: I'm back! Type `{CMD_CHAR}pause` if you want me to stay quiet again.")
-                BotClient.paused = False
+        if len(matches) != 0:
+            for match in matches:
 
-        elif msg.content.startswith(f"{CMD_CHAR}status"):
-            embed = discord.Embed(title="GithubCodeBot :robot: Status:", color=HEX_YELLOW)
-            embed.add_field(name="Paused", value=f">>> `{BotClient.paused}`", inline=False)
-            embed.add_field(name="Preview long code", value=f">>> `{BotClient.long_code}`", inline=False)
-            await msg.channel.send(embed=embed)
+                # (1)
+                url = "https://github.com/" + match[-1]
+                print(f"\nDetected url: {url}")
 
-        elif msg.content.startswith(f"{CMD_CHAR}help"):
-            embed = discord.Embed(title="GithubCodeBot :robot: Commands", description="_Here's what you can ask me to do!_", color=HEX_LBLUE)
-            embed.add_field(name=f"`{CMD_CHAR}pause`", value=">>> I wont respond to any Github links. I'll still be actively listening for commands, though!", inline=False)
-            embed.add_field(name=f"`{CMD_CHAR}unpause`", value=">>> Whatever `pause` does, this un-does.", inline=False)
-            embed.add_field(name=f"`{CMD_CHAR}longcode`", value=">>> Toggle my ability to preview long pieces of code (by splitting the code into multiple messages). Be carefull with this! Once I get going, I won't stop!", inline=False)
-            embed.add_field(name=f"`{CMD_CHAR}status`", value=">>> View my `pause` and `longcode` states.", inline=False)
-            embed.add_field(name=f"`{CMD_CHAR}help`", value=">>> You're looking at it!", inline=False)
-           
-            await msg.channel.send(embed=embed)
-
-
-        elif not BotClient.paused:
-            # The strange process looks like this:
-            #
-            # (1) https://github.com/SeanJxie/3d-engine-from-scratch/blob/main/CppEngine3D/engine.cpp
-            #                                            |
-            #                                            V
-            # (2) ['https:', '', 'github.com', 'SeanJxie', '3d-engine-from-scratch', 'blob', 'main', 'CppEngine3D', 'engine.cpp']
-            #                                            |
-            #                                            V
-            # (3) ['https:/', 'raw.githubusercontent.com', 'SeanJxie', '3d-engine-from-scratch', 'main', 'CppEngine3D', 'engine.cpp']
-            #                                            |
-            #                                            V
-            # (4) https://raw.githubusercontent.com/SeanJxie/3d-engine-from-scratch/main/CppEngine3D/engine.cpp
-
-            print(f"\nMessage: {msg.content}")
-            matches = re.findall("http(s?)://(www\.)?github.com/([^\s]+)", msg.content)
-
-            # We want no reps and valid extensions.
-            matches = list(dict.fromkeys(filter(lambda x: get_ext(x[-1]) in COMMON_EXTS, matches)))
-
-            if len(matches) > 1:
-                await msg.channel.send(f"> :eyes: I've detected {len(matches)} valid links here. They will be served in order!")
-
-            if len(matches) != 0:
-                for match in matches:
-
-                    # (1)
-                    url = "https://github.com/" + match[-1]
-                    print(f"\nDetected url: {url}")
-
-                    # (2)
-                    urlSplit = url.split('/')
+                # (2)
+                urlSplit = url.split('/')
                     
-                    # (3)
-                    urlSplit.remove('')
-                    if "blob" in urlSplit:
-                        urlSplit.remove("blob")
-                    elif "tree" in urlSplit:
-                        urlSplit.remove("tree")
+                # (3)
+                urlSplit.remove('')
+                if "blob" in urlSplit:
+                    urlSplit.remove("blob")
+                elif "tree" in urlSplit:
+                    urlSplit.remove("tree")
 
-                    urlSplit[0] = "https:/"
-                    urlSplit[1] = "raw.githubusercontent.com"
+                urlSplit[0] = "https:/"
+                urlSplit[1] = "raw.githubusercontent.com"
 
-                    # (4)
-                    rawUrl = '/'.join(urlSplit)
-                    print(f"Rebuilt url: {rawUrl}")
+                # (4)
+                rawUrl = '/'.join(urlSplit)
+                print(f"Rebuilt url: {rawUrl}")
 
-                    # Parse HTML and get all text
-                    async with BotClient.aiohttp_session.get(rawUrl) as response:
-                        codeString = await response.text()
-                    payload = f"```{codeString}```"
+                # Parse HTML and get all text
+                async with aiohttp_session.get(rawUrl) as response:
+                    codeString = await response.text()
+                payload = f"```{codeString}```"
                     
-                    if len(payload) <= PAYLOAD_MAXLEN:
-                        await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
-                        await msg.channel.send(payload)
+                if len(payload) <= PAYLOAD_MAXLEN:
+                    await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
+                    await msg.channel.send(payload)
 
-                    # Send text and split into multiple messages if it's too long
-                    elif BotClient.long_code:
-                        await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
-                        print("Code too long. Splitting.")
+                # Send text and split into multiple messages if it's too long
+                elif long_code:
+                    await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
+                    print("Code too long. Splitting.")
 
-                        payloadSegment = ''
+                    payloadSegment = ''
 
-                        for line in codeString.split('\n'):
+                    for line in codeString.split('\n'):
             
-                            if len(payloadSegment) + len(line) + 6 >= PAYLOAD_MAXLEN: # The +6 accounts for the 6 backticks used for code markup
-                                await msg.channel.send(f"```{payloadSegment}```")
-                                print(f"Payload segment size: {len(payloadSegment) + 6}")
-                                payloadSegment = ''
+                        if len(payloadSegment) + len(line) + 6 >= PAYLOAD_MAXLEN: # The +6 accounts for the 6 backticks used for code markup
+                            await msg.channel.send(f"```{payloadSegment}```")
+                            print(f"Payload segment size: {len(payloadSegment) + 6}")
+                            payloadSegment = ''
 
-                            payloadSegment += line + '\n'
+                        payloadSegment += line + '\n'
 
-                        await msg.channel.send(f"```{payloadSegment}```")
-                        print(f"Payload segment size: {len(payloadSegment) + 6}")
+                    await msg.channel.send(f"```{payloadSegment}```")
+                    print(f"Payload segment size: {len(payloadSegment) + 6}")
 
-                    else:
-                        await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
+                else:
+                    await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
 
-                    await msg.channel.send(f"> :ok_hand: That's the end of `{urlSplit[-1]}`")
-                    print("Send success.")
+                await msg.channel.send(f"> :ok_hand: That's the end of `{urlSplit[-1]}`")
+                print("Send success.")
+
+    await ghc_bot.process_commands(msg)
+
+@ghc_bot.command()
+async def longcode(ctx):
+    if not long_code:
+        await ctx.send(f"> :green_circle: Alright! I'll display code over the {PAYLOAD_MAXLEN} character limit!")
+        long_code = True
+    else:
+        await ctx.send(f"> :red_circle: Alright! I'll only display code under the {PAYLOAD_MAXLEN} character limit!")
+        long_code = False
+
+@ghc_bot.command()
+async def pause(ctx):
+    if not paused:
+        await ctx.send(f"> :pause_button: No problem! I'll stay quiet until you type `{CMD_CHAR}pause` again.")
+        paused = True
+
+@ghc_bot.command()
+async def unpause(ctx):
+    if paused:
+        await ctx.send(f"> :arrow_forward: I'm back! Type `{CMD_CHAR}pause` if you want me to stay quiet again.")
+        paused = False
+
+@ghc_bot.command()
+async def status(ctx):
+    embed = discord.Embed(title="GithubCodeBot :robot: Status:", color=HEX_YELLOW)
+    embed.add_field(name="Paused", value=f">>> `{paused}`", inline=False)
+    embed.add_field(name="Preview long code", value=f">>> `{long_code}`", inline=False)
+            
+    await ctx.send(embed=embed)
+
+@ghc_bot.command()
+async def help(ctx):
+    embed = discord.Embed(title="GithubCodeBot :robot: Commands", description="_Here's what you can ask me to do!_", color=HEX_LBLUE)
+    embed.add_field(name=f"`{CMD_CHAR}pause`", value=">>> I wont respond to any Github links. I'll still be actively listening for commands, though!", inline=False)
+    embed.add_field(name=f"`{CMD_CHAR}unpause`", value=">>> Whatever `pause` does, this un-does.", inline=False)
+    embed.add_field(name=f"`{CMD_CHAR}longcode`", value=">>> Toggle my ability to preview long pieces of code (by splitting the code into multiple messages). Be carefull with this! Once I get going, I won't stop!", inline=False)
+    embed.add_field(name=f"`{CMD_CHAR}status`", value=">>> View my `pause` and `longcode` states.", inline=False)
+    embed.add_field(name=f"`{CMD_CHAR}help`", value=">>> You're looking at it!", inline=False)
+           
+    await ctx.send(embed=embed)
 
 
-
+        
 def main():
     print("\nThanks for using GithubCodeBot!\nIf you'd like to reset your bot token or command character, simply delete bot_token.txt or cmd_char.txt and reset the program.\n\nConnecting...\n")
 
-    bot_client = BotClient()
     try:
-        bot_client.run(TOKEN)
+        ghc_bot.run(TOKEN)
     except discord.errors.LoginFailure:
         os.remove(BT_FILEPATH)
         print("The token you've entered is invalid. Please restart the program.")
-
 
 if __name__ == "__main__":
     main()
