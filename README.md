@@ -1,4 +1,4 @@
-# DiscordCodeBot
+# GithubCodeBot
 
 ![example](https://github.com/SeanJxie/DiscordCodeBot/blob/main/exampleImage.png)
 
