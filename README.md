@@ -22,6 +22,7 @@ cd GithubCodeBot
 ```
 ---
 **Then, install the required packages:**
+
 For Python versions `3.5-3.7`:
 ```
 python -m pip install -r requirements.txt
@@ -32,6 +33,7 @@ py -m pip install -r requirements.txt
 ```
 ---
 **Finally, run the bot:**
+
 For Python versions `3.5-3.7`:
 ```
 python src/github_code_bot.py
