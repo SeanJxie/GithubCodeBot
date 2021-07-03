@@ -1,4 +1,8 @@
 # GithubCodeBot
+Recent Changes
+---
+- Now using `aiohttp` for webscraping instead of `requests`.
+- Now using `discord.ext.commands.Bot` instead of `discord.Client`.
 
 ![example](https://github.com/SeanJxie/DiscordCodeBot/blob/main/exampleImage.png)
 
