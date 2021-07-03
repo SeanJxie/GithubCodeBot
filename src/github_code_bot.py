@@ -2,7 +2,10 @@ import re
 import os
 
 import discord
-import requests
+import aiohttp
+import asyncio
+
+#print(f"Discord: {discord.__version__} aiohttp: {aiohttp.__version__}")
 
 # Handle bot token input
 BT_FILEPATH = os.path.join(os.getcwd(), "bot_token.txt")
@@ -27,7 +30,7 @@ else:
     with open(CC_FILEPATH, 'w') as ccf:
         ccf.write(CMD_CHAR)
 
-
+# For pyinstaller exe compilation
 def resource_path(relative_path):
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
@@ -80,6 +83,7 @@ PAYLOAD_MAXLEN = 2000 # Discord character limit
 HEX_YELLOW = 0xFFDF00
 HEX_LBLUE  = 0xADD8E6
 
+# Some helpful functions
 def get_ext(urlStr):
     return urlStr[urlStr.rfind('.') + 1:].lower()
 
@@ -87,6 +91,10 @@ def get_ext(urlStr):
 class BotClient(discord.Client):
     long_code = True
     paused = False
+    aiohttp_session = None
+
+    async def init_session():
+        BotClient.aiohttp_session = aiohttp.ClientSession()
 
     async def on_ready(self):
         print(f"{self.user} is now online.")
@@ -100,7 +108,8 @@ class BotClient(discord.Client):
             except discord.errors.HTTPException:
                 # In the case that the bot is started many times, Discord may complain that we're setting pfp too much. 
                 pass 
-
+        
+        await BotClient.init_session()
         print("Ready.")    
         
     async def on_message(self, msg):
@@ -191,8 +200,8 @@ class BotClient(discord.Client):
                     print(f"Rebuilt url: {rawUrl}")
 
                     # Parse HTML and get all text
-                    response = requests.get(rawUrl)
-                    codeString = response.text
+                    async with BotClient.aiohttp_session.get(rawUrl) as response:
+                        codeString = await response.text()
                     payload = f"```{codeString}```"
                     
                     if len(payload) <= PAYLOAD_MAXLEN:
@@ -200,7 +209,7 @@ class BotClient(discord.Client):
                         await msg.channel.send(payload)
 
                     # Send text and split into multiple messages if it's too long
-                    elif long_code:
+                    elif BotClient.long_code:
                         await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
                         print("Code too long. Splitting.")
 
@@ -226,7 +235,7 @@ class BotClient(discord.Client):
 
 
 
-if __name__ == "__main__":
+def main():
     print("\nThanks for using GithubCodeBot!\nIf you'd like to reset your bot token or command character, simply delete bot_token.txt or cmd_char.txt and reset the program.\n\nConnecting...\n")
 
     bot_client = BotClient()
@@ -235,3 +244,7 @@ if __name__ == "__main__":
     except discord.errors.LoginFailure:
         os.remove(BT_FILEPATH)
         print("The token you've entered is invalid. Please restart the program.")
+
+
+if __name__ == "__main__":
+    main()
