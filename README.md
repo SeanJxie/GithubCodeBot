@@ -9,7 +9,7 @@
 4) You will be prompted for your bot token once. Enter your token and your bot should be good to go!
 
 # Python Windows Setup
-Requirements: [`python 3.8`](https://www.python.org/downloads/), [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), and [`pip`](https://pip.pypa.io/en/stable/installing/).
+Requirements: [`python 3.5` or higher](https://www.python.org/downloads/), [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), and [`pip`](https://pip.pypa.io/en/stable/installing/).
 
 If those requirements are fulfilled, in a target directory:
 ```
@@ -20,10 +20,20 @@ Next, move into the repo:
 cd GithubCodeBot
 ```
 Then, install the required packages:
+For Python versions 3.5-3.7:
+```
+python -m pip install -r requirements.txt
+```
+For Python versions 3.8+:
 ```
 py -m pip install -r requirements.txt
 ```
-Finally, run the bot via:
+Finally, run the bot:
+For Python versions 3.5-3.7:
+```
+python src/github_code_bot.py
+```
+For Python versions 3.8+:
 ```
 py src/github_code_bot.py
 ```
