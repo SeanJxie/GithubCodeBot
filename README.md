@@ -9,7 +9,7 @@
 4) You will be prompted for your bot token once. Enter your token and your bot should be good to go!
 
 # Python Windows Setup
-This process requires a minimum of `python 3.8`, `git`, and `pip3`.
+This process requires a minimum of `python 3.7`, `git`, and `pip`.
 
 If those requirements are fulfilled, in a target directory:
 ```
@@ -21,7 +21,7 @@ cd GithubCodeBot
 ```
 Then, install the required packages:
 ```
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 Finally, run the bot via:
 ```
