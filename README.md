@@ -11,15 +11,15 @@
 # Python Windows Setup
 Requirements: [`python 3.5` or higher](https://www.python.org/downloads/), [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), and [`pip`](https://pip.pypa.io/en/stable/installing/).
 
-If those requirements are fulfilled, in a target directory:
+**If those requirements are fulfilled, in a target directory:**
 ```
 git clone https://github.com/SeanJxie/GithubCodeBot
 ```
-Next, move into the repo:
+**Next, move into the repo:**
 ```
 cd GithubCodeBot
 ```
-Then, install the required packages:
+**Then, install the required packages:**
 For Python versions `3.5-3.7`:
 ```
 python -m pip install -r requirements.txt
@@ -28,7 +28,7 @@ For Python versions `3.8+`:
 ```
 py -m pip install -r requirements.txt
 ```
-Finally, run the bot:
+**Finally, run the bot:**
 For Python versions `3.5-3.7`:
 ```
 python src/github_code_bot.py
