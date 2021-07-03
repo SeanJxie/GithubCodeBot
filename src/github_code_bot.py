@@ -101,7 +101,7 @@ class BotClient(discord.Client):
         self.user.name = "GithubCodeBot"
         print("Username set.")
 
-        with open(resource_path("octo.png"), "rb") as pfp:
+        with open(resource_path("src/octo.png"), "rb") as pfp:
             try:
                 await self.user.edit(avatar=pfp.read())
                 print("Avatar set.")
