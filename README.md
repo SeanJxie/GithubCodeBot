@@ -9,7 +9,7 @@
 4) You will be prompted for your bot token once. Enter your token and your bot should be good to go!
 
 # Python Windows Setup
-This process requires a minimum of [`python 3.8`](https://www.python.org/downloads/), [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), and [`pip`](https://pip.pypa.io/en/stable/installing/).
+Requirements: [`python 3.8`](https://www.python.org/downloads/), [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), and [`pip`](https://pip.pypa.io/en/stable/installing/).
 
 If those requirements are fulfilled, in a target directory:
 ```
