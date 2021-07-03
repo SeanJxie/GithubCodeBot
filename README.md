@@ -11,7 +11,7 @@
 # Python Windows Setup
 Requirements: [`python 3.5` or higher](https://www.python.org/downloads/), [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), and [`pip`](https://pip.pypa.io/en/stable/installing/).
 ---
-1. **If those requirements are fulfilled, in a target directory:**
+1. **If the requirements are fulfilled, in a target directory:**
 ```
 git clone https://github.com/SeanJxie/GithubCodeBot
 ```
