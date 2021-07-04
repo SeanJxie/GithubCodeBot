@@ -32,7 +32,6 @@ cd GithubCodeBot
 ---
 5. **Then, install the required packages:**
 
-For Python versions `3.8+`:
 ```
 py -m pip install -r requirements.txt
 ```
