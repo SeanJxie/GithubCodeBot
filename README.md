@@ -44,5 +44,5 @@ py src/github_code_bot.py
 ---
 
 # Commands
-The `help` command outlines it all.
+The bot's `help` command outlines it all.
 
