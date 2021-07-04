@@ -6,6 +6,8 @@ from discord.ext import commands
 import aiohttp
 import asyncio
 
+from extensions import COMMON_EXTS
+
 #print(f"Discord: {discord.__version__} aiohttp: {aiohttp.__version__}")
 
 # Handle bot token input
@@ -44,45 +46,6 @@ def resource_path(relative_path):
 def get_ext(urlStr):
     return urlStr[urlStr.rfind('.') + 1:].lower()
 
-# Thanks to https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md
-COMMON_EXTS = {
-    "asm"       : "arm", 
-    "c"         : "c",
-    "cc"        : "cpp",
-    "clj"       : "clj",
-    "cpp"       : "cpp",
-    "cs"        : "cs",
-    "cxx"       : "cpp",
-    "el"        : "lisp",
-    "go"        : "go",
-    "h"         : "cpp",
-    "java"      : "java",
-    "lua"       : "lua",
-    "m"         : "matlab",
-    "md"        : "md",
-    "m4"        : None,
-    "php"       : "php",
-    "pl"        : "pl",
-    "po"        : None,
-    "py"        : "py",
-    "rb"        : "rb",
-    "rkt"       : None,
-    "rs"        : "rs",
-    "sh"        : "sh",
-    "s"         : "arm",
-    "swift"     : "swift",
-    "vb"        : "vb",
-    "vcxproj"   : None,
-    "xcodeproj" : None,
-    "xml"       : "xml",
-    "diff"      : None,
-    "patch"     : None,
-    "html"      : "xml",
-    "js"        : "js",
-    "json"      : "json",
-    "csv"       : None
-}
-
 PAYLOAD_MAXLEN = 2000 # Discord character limit
 HEX_YELLOW = 0xFFDF00
 HEX_LBLUE  = 0xADD8E6
@@ -106,7 +69,7 @@ async def on_ready():
     ghc_bot.user.name = "GithubCodeBot"
     print("Username set.")
 
-    with open(resource_path(os.path.join("src", "octo.png")), "rb") as pfp:
+    with open(resource_path(os.path.join(".", "octo.png")), "rb") as pfp:
         try:
             await ghc_bot.user.edit(avatar=pfp.read())
             print("Avatar set.")
