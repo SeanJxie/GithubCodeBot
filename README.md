@@ -1,10 +1,11 @@
 # GithubCodeBot
 Recent Changes
 ---
-- Now using `aiohttp` for webscraping instead of `requests`.
-- Now using `discord.ext.commands.Bot` instead of `discord.Client`.
-- Syntax highlighting has been added thanks to Discord's `highlight.js` integration.
+- Many more languages supported for syntax highlighting.
 - Backticks in code can now be displayed properly.
+- Syntax highlighting has been added thanks to Discord's `highlight.js` integration.
+- Now using `discord.ext.commands.Bot` instead of `discord.Client`.
+- Now using `aiohttp` for webscraping instead of `requests`.
 
 ![demo](https://github.com/SeanJxie/DiscordCodeBot/blob/main/bot_demo.gif)
 
