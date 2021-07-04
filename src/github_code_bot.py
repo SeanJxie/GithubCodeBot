@@ -46,41 +46,41 @@ def get_ext(urlStr):
 
 # Thanks to https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md
 COMMON_EXTS = {
-    "asm" : "arm", 
-    "c"   : "c",
-    "cc"  : "cpp",
-    "clj" : "clj",
-    "cpp" : "cpp",
-    "cs"  : "cs",
-    "cxx" : "cpp",
-    "el"  : "lisp",
-    "go"  : "go",
-    "h"  : "cpp",
-    "java" : "java",
-    "lua" : "lua",
-    "m"  : "matlab",
-    "md" : "md",
-    "m4" : None,
-    "php" : "php",
-    "pl" : "pl",
-    "po" : None,
-    "py" : "py",
-    "rb": "rb",
-    "rkt" : None,
-    "rs" : "rs",
-    "sh" : "sh",
-    "s" : "arm",
-    "swift" : "swift",
-    "vb" : "vb",
-    "vcxproj" : None,
+    "asm"       : "arm", 
+    "c"         : "c",
+    "cc"        : "cpp",
+    "clj"       : "clj",
+    "cpp"       : "cpp",
+    "cs"        : "cs",
+    "cxx"       : "cpp",
+    "el"        : "lisp",
+    "go"        : "go",
+    "h"         : "cpp",
+    "java"      : "java",
+    "lua"       : "lua",
+    "m"         : "matlab",
+    "md"        : "md",
+    "m4"        : None,
+    "php"       : "php",
+    "pl"        : "pl",
+    "po"        : None,
+    "py"        : "py",
+    "rb"        : "rb",
+    "rkt"       : None,
+    "rs"        : "rs",
+    "sh"        : "sh",
+    "s"         : "arm",
+    "swift"     : "swift",
+    "vb"        : "vb",
+    "vcxproj"   : None,
     "xcodeproj" : None,
-    "xml" : "xml",
-    "diff" : None,
-    "patch" : None,
-    "html" : "xml",
-    "js" : "js",
-    "json" : "json",
-    "csv" : None
+    "xml"       : "xml",
+    "diff"      : None,
+    "patch"     : None,
+    "html"      : "xml",
+    "js"        : "js",
+    "json"      : "json",
+    "csv"       : None
 }
 
 PAYLOAD_MAXLEN = 2000 # Discord character limit
@@ -106,7 +106,7 @@ async def on_ready():
     ghc_bot.user.name = "GithubCodeBot"
     print("Username set.")
 
-    with open(resource_path(os.path.join("src", "octo.png")), "rb") as pfp:
+    with open(resource_path(os.path.join(".", "octo.png")), "rb") as pfp:
         try:
             await ghc_bot.user.edit(avatar=pfp.read())
             print("Avatar set.")
@@ -139,7 +139,7 @@ async def on_message(msg):
         matches = re.findall("http(s?)://(www\.)?github.com/([^\s]+)", msg.content)
 
         # We want no reps and valid extensions.
-        matches = list(dict.fromkeys(filter(lambda x: get_ext(x[-1]) in COMMON_EXTS, matches)))
+        matches = list(dict.fromkeys(filter(lambda x: get_ext(x[-1]) in COMMON_EXTS.keys(), matches)))
 
         if len(matches) > 1:
             await msg.channel.send(f"> :eyes: I've detected {len(matches)} valid links here. They will be served in order!")
