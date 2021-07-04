@@ -106,7 +106,7 @@ async def on_ready():
     ghc_bot.user.name = "GithubCodeBot"
     print("Username set.")
 
-    with open(resource_path(os.path.join(".", "octo.png")), "rb") as pfp:
+    with open(resource_path(os.path.join("src", "octo.png")), "rb") as pfp:
         try:
             await ghc_bot.user.edit(avatar=pfp.read())
             print("Avatar set.")
