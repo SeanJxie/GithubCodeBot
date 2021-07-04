@@ -41,55 +41,56 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
  
-COMMON_EXTS = (
-    "asm",
-    "c",
-    "cc",
-    "class",
-    "clj",
-    "cpp",
-    "cs",
-    "cxx",
-    "el",
-    "go",
-    "h",
-    "java",
-    "lua",
-    "m",
-    "md",
-    "m4",
-    "php",
-    "pl",
-    "po",
-    "py",
-    "rb",
-    "rkt"
-    "rs",
-    "sh",
-    "s",
-    "swift",
-    "vb",
-    "vcxproj",
-    "xcodeproj",
-    "xml",
-    "diff",
-    "patch",
-    "html",
-    "js",
-    "json",
-    "csv",
-)
+def get_ext(urlStr):
+    return urlStr[urlStr.rfind('.') + 1:].lower()
+
+# Thanks to https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md
+COMMON_EXTS = {
+    "asm" : "arm", 
+    "c"   : "c",
+    "cc"  : "cpp",
+    "clj" : "clj",
+    "cpp" : "cpp",
+    "cs"  : "cs",
+    "cxx" : "cpp",
+    "el"  : "lisp",
+    "go"  : "go",
+    "h"  : "cpp",
+    "java" : "java",
+    "lua" : "lua",
+    "m"  : "matlab",
+    "md" : "md",
+    "m4" : None,
+    "php" : "php",
+    "pl" : "pl",
+    "po" : None,
+    "py" : "py",
+    "rb": "rb",
+    "rkt" : None,
+    "rs" : "rs",
+    "sh" : "sh",
+    "s" : "arm",
+    "swift" : "swift",
+    "vb" : "vb",
+    "vcxproj" : None,
+    "xcodeproj" : None,
+    "xml" : "xml",
+    "diff" : None,
+    "patch" : None,
+    "html" : "xml",
+    "js" : "js",
+    "json" : "json",
+    "csv" : None
+}
 
 PAYLOAD_MAXLEN = 2000 # Discord character limit
 HEX_YELLOW = 0xFFDF00
 HEX_LBLUE  = 0xADD8E6
 
-def get_ext(urlStr):
-    return urlStr[urlStr.rfind('.') + 1:].lower()
-
-# Bot code
+# Bot code start here.
 ghc_bot = commands.Bot(command_prefix=CMD_CHAR, description="A Discord bot to preview code in Github links.")
 ghc_bot.remove_command("help") # We write our own.
+
 aiohttp_session = None
 long_code = True
 paused = False
@@ -105,7 +106,7 @@ async def on_ready():
     ghc_bot.user.name = "GithubCodeBot"
     print("Username set.")
 
-    with open(resource_path(os.path.join("src", "octo.png")), "rb") as pfp:
+    with open(resource_path(os.path.join(".", "octo.png")), "rb") as pfp:
         try:
             await ghc_bot.user.edit(avatar=pfp.read())
             print("Avatar set.")
@@ -121,7 +122,7 @@ async def on_message(msg):
     if msg.author == ghc_bot.user:
         return 
     elif not paused:
-        # The strange process looks like this:
+        # The process looks like this:
         #
         # (1) https://github.com/SeanJxie/3d-engine-from-scratch/blob/main/CppEngine3D/engine.cpp
         #                                            |
@@ -170,10 +171,16 @@ async def on_message(msg):
                 # Parse HTML and get all text
                 async with aiohttp_session.get(rawUrl) as response:
                     codeString = await response.text()
-                payload = f"```{codeString}```"
+
+                highlightJSCode = COMMON_EXTS[get_ext(urlSplit[-1])]
+                if highlightJSCode is not None:
+                    payload = f"```{highlightJSCode}\n{codeString}```"
+                else:
+                    payload = f"```{codeString}```"
                     
                 if len(payload) <= PAYLOAD_MAXLEN:
                     await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
+                    print(urlSplit)
                     await msg.channel.send(payload)
 
                 # Send text and split into multiple messages if it's too long
@@ -186,19 +193,27 @@ async def on_message(msg):
                     for line in codeString.split('\n'):
             
                         if len(payloadSegment) + len(line) + 6 >= PAYLOAD_MAXLEN: # The +6 accounts for the 6 backticks used for code markup
-                            await msg.channel.send(f"```{payloadSegment}```")
+                            if highlightJSCode is not None:
+                                await msg.channel.send(f"```{highlightJSCode}\n{payloadSegment}```")
+                            else:
+                                await msg.channel.send(f"```{payloadSegment}```")
                             print(f"Payload segment size: {len(payloadSegment) + 6}")
                             payloadSegment = ''
 
                         payloadSegment += line + '\n'
 
-                    await msg.channel.send(f"```{payloadSegment}```")
+                    if highlightJSCode is not None:
+                        await msg.channel.send(f"```{highlightJSCode}\n{payloadSegment}```")
+                    else:
+                        await msg.channel.send(f"```{payloadSegment}```")
                     print(f"Payload segment size: {len(payloadSegment) + 6}")
 
                 else:
                     await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
 
                 await msg.channel.send(f"> :ok_hand: That's the end of `{urlSplit[-1]}`")
+                if "```" in codeString:
+                    await msg.channel.send(f"> :scream: Uh-oh! It looks like there are triple backticks (\`\`\`) in the code. I don't know how to deal with them right now, so sorry about all that messed up formatting!")
                 print("Send success.")
 
     await ghc_bot.process_commands(msg)
@@ -235,7 +250,7 @@ async def status(ctx):
 @ghc_bot.command()
 async def help(ctx):
     embed = discord.Embed(title="GithubCodeBot :robot: Commands", description="_Here's what you can ask me to do!_", color=HEX_LBLUE)
-    embed.add_field(name=f"`{CMD_CHAR}pause`", value=">>> I wont respond to any Github links. I'll still be actively listening for commands, though!", inline=False)
+    embed.add_field(name=f"`{CMD_CHAR}pause`", value=">>> I won't respond to any Github links. I'll still be actively listening for commands, though!", inline=False)
     embed.add_field(name=f"`{CMD_CHAR}unpause`", value=">>> Whatever `pause` does, this un-does.", inline=False)
     embed.add_field(name=f"`{CMD_CHAR}longcode`", value=">>> Toggle my ability to preview long pieces of code (by splitting the code into multiple messages). Be carefull with this! Once I get going, I won't stop!", inline=False)
     embed.add_field(name=f"`{CMD_CHAR}status`", value=">>> View my `pause` and `longcode` states.", inline=False)
@@ -243,12 +258,12 @@ async def help(ctx):
            
     await ctx.send(embed=embed)
 
-
-        
 def main():
-    print("\nThanks for using GithubCodeBot!\nIf you'd like to reset your bot token or command character, simply delete bot_token.txt or cmd_char.txt and reset the program.\n\nConnecting...\n")
+    print("Thanks for using GithubCodeBot!\nIf you'd like to reset your bot token or command character, simply delete bot_token.txt or cmd_char.txt and reset the program.\n")
+    print("Github repo: https://github.com/SeanJxie/GithubCodeBot")
 
     try:
+        print("\nConnecting...\n")
         ghc_bot.run(TOKEN)
     except discord.errors.LoginFailure:
         os.remove(BT_FILEPATH)
