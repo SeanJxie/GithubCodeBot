@@ -179,9 +179,7 @@ async def on_message(msg):
                 else:
                     await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
 
-                await msg.channel.send(f"> :ok_hand: That's the end of `{urlSplit[-1]}`")
-                if "```" in codeString:
-                    await msg.channel.send(f"> :scream: Uh-oh! It looks like there are triple backticks (\`\`\`) in the code. I don't know how to deal with them right now, so sorry about all that messed up formatting!")
+                await msg.channel.send(f"> :ok_hand: That's the end of `{urlSplit[-1]}`") 
                 print("Send success.")
 
     await ghc_bot.process_commands(msg)
