@@ -106,7 +106,7 @@ async def on_ready():
     ghc_bot.user.name = "GithubCodeBot"
     print("Username set.")
 
-    with open(resource_path(os.path.join("src", "octo.png")), "rb") as pfp:
+    with open(resource_path(os.path.join(".", "octo.png")), "rb") as pfp:
         try:
             await ghc_bot.user.edit(avatar=pfp.read())
             print("Avatar set.")
@@ -172,38 +172,43 @@ async def on_message(msg):
                 async with aiohttp_session.get(rawUrl) as response:
                     codeString = await response.text()
 
-                highlightJSCode = COMMON_EXTS[get_ext(urlSplit[-1])]
-                if highlightJSCode is not None:
-                    payload = f"```{highlightJSCode}\n{codeString}```"
+                backtickCount = codeString.count("```")
+                codeString = codeString.replace("```", "`​``") # Zero-width spaces allow triple backticks to be shown in code markdown. THe second string has a zero-width char inbetween the first 2 backticks
+                highlightAlias = COMMON_EXTS[get_ext(urlSplit[-1])]
+
+                if highlightAlias is not None:
+                    payload = f"```{highlightAlias}\n{codeString}```"
                 else:
                     payload = f"```{codeString}```"
-                    
+                
+                await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
                 if len(payload) <= PAYLOAD_MAXLEN:
-                    await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
+                    
                     print(urlSplit)
                     await msg.channel.send(payload)
 
                 # Send text and split into multiple messages if it's too long
                 elif long_code:
-                    await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
                     print("Code too long. Splitting.")
 
                     payloadSegment = ''
 
                     for line in codeString.split('\n'):
-            
-                        if len(payloadSegment) + len(line) + 6 >= PAYLOAD_MAXLEN: # The +6 accounts for the 6 backticks used for code markup
-                            if highlightJSCode is not None:
-                                await msg.channel.send(f"```{highlightJSCode}\n{payloadSegment}```")
+                        payloadSize = len(payloadSegment) + len(line) + len(highlightAlias) + backtickCount + 6 # The +6 accounts for the 6 backticks used for code markup
+
+                        if payloadSize >= PAYLOAD_MAXLEN: 
+                            if highlightAlias is not None:
+                                await msg.channel.send(f"```{highlightAlias}\n{payloadSegment}```")
                             else:
                                 await msg.channel.send(f"```{payloadSegment}```")
+                                
                             print(f"Payload segment size: {len(payloadSegment) + 6}")
                             payloadSegment = ''
 
                         payloadSegment += line + '\n'
 
-                    if highlightJSCode is not None:
-                        await msg.channel.send(f"```{highlightJSCode}\n{payloadSegment}```")
+                    if highlightAlias is not None:
+                        await msg.channel.send(f"```{highlightAlias}\n{payloadSegment}```")
                     else:
                         await msg.channel.send(f"```{payloadSegment}```")
                     print(f"Payload segment size: {len(payloadSegment) + 6}")
