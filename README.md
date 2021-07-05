@@ -25,21 +25,20 @@ Requirements: [`python 3.5` or higher](https://www.python.org/downloads/), [`git
 git clone https://github.com/SeanJxie/GithubCodeBot
 ```
 ---
-4. **Next, move into the repo:**
-```
-cd GithubCodeBot
-```
----
-5. **Then, install the required packages:**
-
+4. **Then, install the required packages:**
 ```
 py -m pip install -r requirements.txt
+```
+---
+5. **Next, move into the repo:**
+```
+cd GithubCodeBot/src
 ```
 ---
 6. **Finally, run the bot:**
 
 ```
-py src/github_code_bot.py
+py github_code_bot.py
 ```
 ---
 
