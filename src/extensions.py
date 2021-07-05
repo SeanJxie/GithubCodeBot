@@ -341,4 +341,5 @@ COMMON_EXTS = {
     "yaml" : "yml",
     "yaml-tmlanguage" : "yml",
     "zep" : "zep",
+    "txt" : ""
 }
