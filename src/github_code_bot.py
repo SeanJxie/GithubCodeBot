@@ -69,7 +69,7 @@ async def on_ready():
     ghc_bot.user.name = "GithubCodeBot"
     print("Username set.")
 
-    with open(resource_path(os.path.join(".", "octo.png")), "rb") as pfp:
+    with open(resource_path("octo.png"), "rb") as pfp:
         try:
             await ghc_bot.user.edit(avatar=pfp.read())
             print("Avatar set.")
@@ -179,13 +179,14 @@ async def on_message(msg):
                 else:
                     await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
 
-                await msg.channel.send(f"> :ok_hand: That's the end of `{urlSplit[-1]}`") 
+                await msg.channel.send(f"> :ok_hand: That's the end of `{urlSplit[-1]}`")
                 print("Send success.")
 
     await ghc_bot.process_commands(msg)
 
 @ghc_bot.command()
 async def longcode(ctx):
+    global long_code
     if not long_code:
         await ctx.send(f"> :green_circle: Alright! I'll display code over the {PAYLOAD_MAXLEN} character limit!")
         long_code = True
@@ -195,12 +196,14 @@ async def longcode(ctx):
 
 @ghc_bot.command()
 async def pause(ctx):
+    global paused
     if not paused:
-        await ctx.send(f"> :pause_button: No problem! I'll stay quiet until you type `{CMD_CHAR}pause` again.")
+        await ctx.send(f"> :pause_button: No problem! I'll stay quiet until you type `{CMD_CHAR}unpause` (I'll still respond to commands, though!).")
         paused = True
 
 @ghc_bot.command()
 async def unpause(ctx):
+    global paused
     if paused:
         await ctx.send(f"> :arrow_forward: I'm back! Type `{CMD_CHAR}pause` if you want me to stay quiet again.")
         paused = False
