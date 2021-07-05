@@ -15,7 +15,7 @@ Recent Changes
 2) Download and run [`GithubCodeBot.exe`](https://github.com/SeanJxie/DiscordCodeBot/blob/main/GithubCodeBot.exe?raw=true).
 You will be prompted for your bot token and command prefix. 
 ---
-3) Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html#inviting-your-bot) to invite the bot to a server of your choice. **The bot should have the `Send Messages`permission only.**
+3) Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html#inviting-your-bot) to invite the bot to a server of your choice. **The bot should have the `Send Messages`permission only.** After this, you should be good to go!
 ---
 
 # Python Windows Setup
