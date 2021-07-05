@@ -84,6 +84,7 @@ COMMON_EXTS = {
     "fsi" : "fs",
     "fsx" : "fs",
     "golo" : "golo",
+    "go": "go",
     "gradle" : "gradle",
     "groovy" : "groovy",
     "grt" : "groovy",
