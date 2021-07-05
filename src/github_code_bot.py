@@ -67,12 +67,14 @@ async def init_aiohttp_session():
 async def on_ready():
     print(f"{ghc_bot.user} is now online.")
     ghc_bot.user.name = "GithubCodeBot"
-    print("Username set.")
+    print(f"Username set to {ghc_bot.user.name}.")
 
-    with open(resource_path("octo.png"), "rb") as pfp:
+    avatarPath = resource_path(os.path.join(r"..\assets", "octo.png"))
+
+    with open(avatarPath, "rb") as pfp:
         try:
             await ghc_bot.user.edit(avatar=pfp.read())
-            print("Avatar set.")
+            print(f"Avatar set to {avatarPath}.")
         except discord.errors.HTTPException:
             # In the case that the bot is started many times, Discord may complain that we're setting pfp too much. 
             pass 
