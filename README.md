@@ -20,7 +20,7 @@ Requirements: [`python 3.5` or higher](https://www.python.org/downloads/), [`git
 1) Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html#creating-a-bot-account) to create a bot and obtain a bot token (you don't need to worry about the bot name or avatar). **Save the bot token for later.**
 2) Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html#inviting-your-bot) to invite the bot to a server of your choice. **The bot should have the `Send Messages`permission only.**
 ---
-3. **If the requirements are fulfilled, in a target directory:**
+3. **If the requirements are fulfilled, in a target directory, clone the repo:**
 ```
 git clone https://github.com/SeanJxie/GithubCodeBot
 ```
