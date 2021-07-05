@@ -29,20 +29,20 @@ Requirements: [`python 3.5` or higher](https://www.python.org/downloads/), [`git
 git clone https://github.com/SeanJxie/GithubCodeBot
 ```
 ---
-4. **Then, install the required packages:**
+4. **Next, move into the repo:**
 ```
-py -m pip install -r requirements.txt
+cd GithubCodeBot
 ```
 ---
-5. **Next, move into the repo:**
+5. **Then, install the required packages:**
 ```
-cd GithubCodeBot/src
+py -m pip install -r requirements.txt
 ```
 ---
 6. **Finally, run the bot:**
 
 ```
-py github_code_bot.py
+py src/github_code_bot.py
 ```
 ---
 7) You will be prompted for your bot token and command prefix. Input them and you should be good to go!
