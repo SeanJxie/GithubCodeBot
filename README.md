@@ -43,7 +43,7 @@ cd src
 py github_code_bot.py
 ```
 ---
-7) Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html#inviting-your-bot) to invite the bot to a server of your choice. **The bot should have the `Send Messages`permission only.** After this you should be good to go!
+7) Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html#inviting-your-bot) to invite the bot to a server of your choice. **The bot should have the `Send Messages`permission only.** After this, you should be good to go!
 ---
 # Commands
 The bot's `help` command outlines it all.
