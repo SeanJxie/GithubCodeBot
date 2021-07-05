@@ -37,7 +37,7 @@ cd GithubCodeBot
 py -m pip install -r requirements.txt
 ```
 ---
-6. **Move into the `src` folder and run the bot (You will be prompted for your bot token and command prefix.):**
+6. **Move into the `src` folder and run the bot (you will be prompted for your bot token and command prefix.):**
 ```
 cd src
 py github_code_bot.py
