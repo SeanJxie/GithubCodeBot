@@ -19,6 +19,7 @@ You will be prompted for your bot token and command prefix.
 ---
 
 # Python Windows Setup
+If you don't feel like running a sketchy unsigned exe, follow these steps to get the bot up and running locally.
 Requirements: [`python 3.5` or higher](https://www.python.org/downloads/), [`git`](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), and [`pip`](https://pip.pypa.io/en/stable/installing/).
 1) Follow the instructions [here](https://discordpy.readthedocs.io/en/latest/discord.html#creating-a-bot-account) to create a bot and obtain a bot token (you don't need to worry about the bot name or avatar). **Save the bot token for later.**
 ---
