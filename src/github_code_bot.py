@@ -70,7 +70,7 @@ async def on_ready():
     ghc_bot.user.name = "GithubCodeBot"
     print(f"Username set to {ghc_bot.user.name}.")
 
-    avatarPath = resource_path(os.path.join("../assets", "octo.png"))
+    avatarPath = resource_path(os.path.join(r"..\assets", "octo.png"))
 
     with open(avatarPath, "rb") as pfp:
         try:
@@ -135,56 +135,64 @@ async def on_message(msg):
                 print(f"Rebuilt url: {rawUrl}")
 
                 # Parse HTML and get all text
+                print("Getting response...")
                 async with aiohttp_session.get(rawUrl) as response:
+                    status = response.status
                     codeString = await response.text()
+                print(f"Done.\nStatus: {status}")
 
-                backtickCount = codeString.count("```")
-                codeString = codeString.replace("```", "`​``") # Zero-width spaces allow triple backticks to be shown in code markdown. THe second string has a zero-width char inbetween the first 2 backticks
-                highlightAlias = COMMON_EXTS[get_ext(urlSplit[-1])]
+                if status == 404:
+                    await msg.channel.send("> :scream: Uh oh! It seems I can't find anything in that URL. Perhaps it's a private repo...")
+                    print("404 Error send success.")
 
-                if highlightAlias is not None:
-                    payload = f"```{highlightAlias}\n{codeString}```"
                 else:
-                    payload = f"```{codeString}```"
-                
-                fileNameUnquoted = urllib.parse.unquote(urlSplit[-1])
-                await msg.channel.send(f"> :desktop: The following code is found in `{fileNameUnquoted}`:")
-                if len(payload) <= PAYLOAD_MAXLEN:
-                    
-                    print(urlSplit)
-                    await msg.channel.send(payload)
-
-                # Send text and split into multiple messages if it's too long
-                elif long_code:
-                    print("Code too long. Splitting.")
-
-                    payloadSegment = ''
-
-                    for line in codeString.split('\n'):
-                        payloadSize = len(payloadSegment) + len(line) + len(highlightAlias) + backtickCount + 6 # The +6 accounts for the 6 backticks used for code markup
-
-                        if payloadSize >= PAYLOAD_MAXLEN: 
-                            if highlightAlias is not None:
-                                await msg.channel.send(f"```{highlightAlias}\n{payloadSegment}```")
-                            else:
-                                await msg.channel.send(f"```{payloadSegment}```")
-                                
-                            print(f"Payload segment size: {len(payloadSegment) + 6}")
-                            payloadSegment = ''
-
-                        payloadSegment += line + '\n'
+                    backtickCount = codeString.count("```")
+                    codeString = codeString.replace("```", "`​``") # Zero-width spaces allow triple backticks to be shown in code markdown. THe second string has a zero-width char inbetween the first 2 backticks
+                    highlightAlias = COMMON_EXTS[get_ext(urlSplit[-1])]
 
                     if highlightAlias is not None:
-                        await msg.channel.send(f"```{highlightAlias}\n{payloadSegment}```")
+                        payload = f"```{highlightAlias}\n{codeString}```"
                     else:
-                        await msg.channel.send(f"```{payloadSegment}```")
-                    print(f"Payload segment size: {len(payloadSegment) + 6}")
+                        payload = f"```{codeString}```"
+                    
+                    fileNameUnquoted = urllib.parse.unquote(urlSplit[-1])
+                    await msg.channel.send(f"> :desktop: The following code is found in `{fileNameUnquoted}`:")
+                    if len(payload) <= PAYLOAD_MAXLEN:
+                        
+                        print(urlSplit)
+                        await msg.channel.send(payload)
 
-                else:
-                    await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
+                    # Send text and split into multiple messages if it's too long
+                    elif long_code:
+                        print("Code too long. Splitting.")
 
-                await msg.channel.send(f"> :ok_hand: That's the end of `{fileNameUnquoted}`")
-                print("Send success.")
+                        payloadSegment = ''
+
+                        for line in codeString.split('\n'):
+                            payloadSize = len(payloadSegment) + len(line) + len(highlightAlias) + backtickCount + 6 # The +6 accounts for the 6 backticks used for code markup
+
+                            if payloadSize >= PAYLOAD_MAXLEN: 
+                                if highlightAlias is not None:
+                                    await msg.channel.send(f"```{highlightAlias}\n{payloadSegment}```")
+                                else:
+                                    await msg.channel.send(f"```{payloadSegment}```")
+                                    
+                                print(f"Payload segment size: {len(payloadSegment) + 6}")
+                                payloadSegment = ''
+
+                            payloadSegment += line + '\n'
+
+                        if highlightAlias is not None:
+                            await msg.channel.send(f"```{highlightAlias}\n{payloadSegment}```")
+                        else:
+                            await msg.channel.send(f"```{payloadSegment}```")
+                        print(f"Payload segment size: {len(payloadSegment) + 6}")
+
+                    else:
+                        await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
+
+                    await msg.channel.send(f"> :ok_hand: That's the end of `{fileNameUnquoted}`")
+                    print("Send success.")
 
     await ghc_bot.process_commands(msg)
 
