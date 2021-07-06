@@ -1,5 +1,6 @@
 import re
 import os
+import urllib.parse
 
 import discord
 from discord.ext import commands
@@ -69,7 +70,7 @@ async def on_ready():
     ghc_bot.user.name = "GithubCodeBot"
     print(f"Username set to {ghc_bot.user.name}.")
 
-    avatarPath = resource_path(os.path.join(r"..\assets", "octo.png"))
+    avatarPath = resource_path(os.path.join("../assets", "octo.png"))
 
     with open(avatarPath, "rb") as pfp:
         try:
@@ -146,7 +147,8 @@ async def on_message(msg):
                 else:
                     payload = f"```{codeString}```"
                 
-                await msg.channel.send(f"> :desktop: The following code is found in `{urlSplit[-1]}`:")
+                fileNameUnquoted = urllib.parse.unquote(urlSplit[-1])
+                await msg.channel.send(f"> :desktop: The following code is found in `{fileNameUnquoted}`:")
                 if len(payload) <= PAYLOAD_MAXLEN:
                     
                     print(urlSplit)
@@ -181,7 +183,7 @@ async def on_message(msg):
                 else:
                     await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
 
-                await msg.channel.send(f"> :ok_hand: That's the end of `{urlSplit[-1]}`")
+                await msg.channel.send(f"> :ok_hand: That's the end of `{fileNameUnquoted}`")
                 print("Send success.")
 
     await ghc_bot.process_commands(msg)
