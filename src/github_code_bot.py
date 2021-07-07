@@ -81,7 +81,7 @@ async def on_ready():
             pass 
     
     await init_aiohttp_session()
-    print("Ready.")     
+    print("Ready.")    
 
 @ghc_bot.event
 async def on_message(msg):
@@ -99,7 +99,7 @@ async def on_message(msg):
         # (3) ['https:/', 'raw.githubusercontent.com', 'SeanJxie', '3d-engine-from-scratch', 'main', 'CppEngine3D', 'engine.cpp']
         #                                            |
         #                                            V
-        # (4) https://raw.githubusercontent.com/SeanJxie/3d-engine-from-scratch/main/CppEngine3D/engine.cpp
+        # (4) https://raw.githubusercontent.com/SeanJxie/3d-engine-from-scratch/main/CppEngine3D/engine.cpp   +1`
 
         print(f"\nMessage: {msg.content}")
         matches = re.findall("http(s?)://(www\.)?github.com/([^\s]+)", msg.content)
@@ -182,10 +182,7 @@ async def on_message(msg):
 
                             payloadSegment += line + '\n'
 
-                        if highlightAlias is not None:
-                            await msg.channel.send(f"```{highlightAlias}\n{payloadSegment}```")
-                        else:
-                            await msg.channel.send(f"```{payloadSegment}```")
+                        await msg.channel.send(f"```{highlightAlias}\n{payloadSegment}```")
                         print(f"Payload segment size: {len(payloadSegment) + 6}")
 
                     else:
