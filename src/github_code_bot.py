@@ -186,7 +186,7 @@ async def on_message(msg):
                         print(f"Payload segment size: {len(payloadSegment) + 6}")
 
                     else:
-                        await msg.channel.send(f"> That's a lot of code! Type `!long_code` to toggle my long code reading ability!")
+                        await msg.channel.send(f"> That's a lot of code! Type `{CMD_CHAR}longcode` to toggle my long code reading ability!")
 
                     await msg.channel.send(f"> :ok_hand: That's the end of `{fileNameUnquoted}`")
                     print("Send success.")
